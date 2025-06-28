@@ -59,7 +59,7 @@ tickers = ["AAPL", "AMZN", "AVGO", "META", "MSFT", "NVDA", "GOOGL", "TSLA", "NFL
 etf = ["BITB", "EDV", "FLIN", "GLD", "IEF", "IEMG", "ITA", "IVV", "SCHD", "SGOV", "TLT", "TMF", "VEA", "VNQ", "XLE", "XLF", "XLP", "XLV"]
 
 combined_symbol = ", ".join(tickers) + ", ".join(etf)
-stock_question = "위의 주식 종목을 분석해주고 포트폴리오를 현재 기준으로 재 조정해줘."
+stock_question = "위의 주식 및 ETF 종목을 분석해주고, 포트폴리오를 현재 글로벌 경제 기준으로 재조정해줘. 한글로 써줘"
 user_question = combined_symbol + " " + stock_question
 
 # 마지막 정리

@@ -75,7 +75,7 @@ with open(filename, 'r', encoding='utf-8') as file:
 # Title
 ###################################################
 pdf.set_font("NotoSansKR-Bold", size=16)
-pdf.multi_cell(0, 10, f"GPT 투자 리포트- {today}\n", align="C")
+pdf.multi_cell(0, 10, f"AI 투자 리포트- {today}\n", align="C")
 pdf.set_font("NotoSansKR-Regular", size=11)
 
 questions = ["macroeconomy_default.txt", "equity_market.txt", "asset_etf.txt", "portfolio_perspective.txt"]
@@ -151,6 +151,7 @@ def get_etf_current_price(symbol):
     else:
         return None
 
+"""
 pdf.set_font("NotoSansKR-Regular", size=12)
 pdf.multi_cell(0, 10, f"주요 주식 및 ETF 현황 \n", align="C")
 pdf.set_font("NotoSansKR-Regular", size=11)
@@ -199,17 +200,20 @@ for symbol in etf:
         f"P/E 비율: {pe}\n"
     )
     pdf.ln(5)
+"""
 
-filename = f"gpt_invest_report_{today}.pdf"
+filename = f"ai_invest_report_{today}.pdf"
 print(filename)
 pdf.output(filename)
+
+recipients = ["denny.ds.yang@gmail.com", "invesperman@gmail.com"]
 
 # 📧 이메일 전송
 yag = yagmail.SMTP(user=EMAIL_USER, password=EMAIL_PASS)
 yag.send(
-    to=EMAIL_USER,
-    subject=f"Daily GPT 투자 리포트 ({today})",
-    contents="오늘의 GPT 기반 투자 리포트를 첨부했습니다.",
+    to=recipients,
+    subject=f"Daily AI 투자 리포트 ({today})",
+    contents="오늘의 AI 기반 투자 리포트를 첨부했습니다.\n\n감사합니다.",
     attachments=filename
 )
 

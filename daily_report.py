@@ -1,4 +1,6 @@
+#######
 import os
+import openai
 from openai import OpenAI
 from fpdf import FPDF
 import yagmail
@@ -6,6 +8,9 @@ from datetime import datetime
 from dotenv import load_dotenv
 import yfinance as yf
 from fpdf.enums import XPos, YPos
+import requests
+from PIL import Image
+from io import BytesIO
 
 if os.getenv("GITHUB_ACTIONS") != "true":
     load_dotenv()  # 로컬 환경일 경우에만 .env 파일을 불러옵니다
@@ -23,34 +28,91 @@ pdf = FPDF()
 pdf.add_page()
 
 pdf.add_font("NotoSansKR-Regular", "", "fonts/static/NotoSansKR-Regular.ttf")
-pdf.set_font("NotoSansKR-Regular", size=12)
+pdf.add_font("NotoSansKR-Bold", "", "fonts/static/NotoSansKR-Bold.ttf")
+pdf.set_font("NotoSansKR-Regular", size=11)
 
 # 오늘 날짜
 today = datetime.today().strftime("%Y-%m-%d")
+
+# Generate an image for report
+prompt = "Please generate an image that represents today's U.S. economy and stock market."
+response = openai.images.generate(
+    prompt=prompt,
+    n=1,
+    size="1024x1024"
+)
+
+image_url = response.data[0].url
+image_data = requests.get(image_url).content
+
+image = Image.open(BytesIO(requests.get(image_url).content))
+width, height = image.size
+
+# 중앙 30% 계산 (높이 기준)
+crop_height = int(height * 0.20)
+top = (height - crop_height) // 2
+bottom = top + crop_height
+
+# 좌우는 전체 유지
+left = 0
+right = width
+
+# 잘라내기
+cropped_img = image.crop((left, top, right, bottom))
+cropped_img.save("generated_image.png")
+print("image generated!")
+
+# 🖼  Add image to PDF (make sure the image path is correct)
+pdf.image("generated_image.png", x=10, y=10, w=190)  # Adjust position/size as needed
+pdf.set_y(10 + crop_height * 190 / 1024 + 5)
 
 # system question
 filename = "questions/system_default.txt"
 with open(filename, 'r', encoding='utf-8') as file:
     system_question = file.read()
 
-# user question 
-filename = "questions/user_default.txt"
-with open(filename, 'r', encoding='utf-8') as file:
-    user_question = file.read()
+###################################################
+# Title
+###################################################
+pdf.set_font("NotoSansKR-Bold", size=16)
+pdf.multi_cell(0, 10, f"GPT 투자 리포트- {today}\n", align="C")
+pdf.set_font("NotoSansKR-Regular", size=11)
 
-# 🤖 GPT-4o 호출
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "system", "content": system_question},
-        {"role": "user", "content": user_question}
-    ],
-    temperature=0.5
-)
+questions = ["macroeconomy_default.txt", "equity_market.txt", "asset_etf.txt", "portfolio_perspective.txt"]
 
-answer = response.choices[0].message.content
+# questions
+for u_question in questions:
+    # 파일 읽고 문자열로 합치기
+    with open("questions/" + u_question, "r", encoding="utf-8") as f1, open("questions/user_mode_korean.txt", "r", encoding="utf-8") as f2:
+        content1 = f1.read()
+        content2 = f2.read()
 
-pdf.multi_cell(0, 10, f"날짜: {today}\n\n GPT 투자 리포트\n\n{answer} \n")
+    user_question = "today is: " + today + "\n" + content1 + "\n" + content2  # 줄바꿈 포함하여 연결
+
+    # 🤖 GPT-4o 호출
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": system_question},
+            {"role": "user", "content": user_question}
+        ],
+        temperature=0.5
+    )
+
+    answer = response.choices[0].message.content
+
+    pdf.set_font("NotoSansKR-Regular", size=12)
+    if u_question.startswith("macroeconomy"):
+        pdf.multi_cell(0, 10, f"거시경제 분석\n", align="C")
+    elif u_question.startswith("equity"):
+        pdf.multi_cell(0, 10, f"주식 시장 분석\n", align="C")
+    elif u_question.startswith("asset"):
+        pdf.multi_cell(0, 10, f"자산 시장 및 ETF 분석\n", align="C")
+    elif u_question.startswith("portfolio"):
+        pdf.multi_cell(0, 10, f"포트폴리오 전략 분석\n", align="C")
+
+    pdf.set_font("NotoSansKR-Regular", size=11)
+    pdf.multi_cell(0, 10, f"{answer} \n", align="L")
 
 # Yahoo Finance
 
@@ -61,6 +123,11 @@ etf = ["BITB", "EDV", "FLIN", "GLD", "IEF", "IEMG", "ITA", "IVV", "SCHD", "SGOV"
 combined_symbol = ", ".join(tickers) + ", ".join(etf)
 stock_question = "위의 주식 및 ETF 종목을 분석해주고, 포트폴리오를 현재 글로벌 경제 기준으로 재조정해줘. 한글로 써줘"
 user_question = combined_symbol + " " + stock_question
+
+
+pdf.set_font("NotoSansKR-Regular", size=12)
+pdf.multi_cell(0, 10, f"포트폴리오 분석 및 전망 \n", align="C")
+pdf.set_font("NotoSansKR-Regular", size=11)
 
 # 마지막 정리
 # 🤖 GPT-4o 호출
@@ -83,6 +150,10 @@ def get_etf_current_price(symbol):
         return round(current_price, 2)
     else:
         return None
+
+pdf.set_font("NotoSansKR-Regular", size=12)
+pdf.multi_cell(0, 10, f"주요 주식 및 ETF 현황 \n", align="C")
+pdf.set_font("NotoSansKR-Regular", size=11)
 
 # 각 종목에 대해 정보 수집
 for symbol in tickers:

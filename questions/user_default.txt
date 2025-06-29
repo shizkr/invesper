@@ -1,19 +1,20 @@
-거시경제
-오늘 발표된 미국의 주요 경제지표와 뉴스는 무엇인가요? 시장에 어떤 영향을 주었나요?
-최근 미국 연준(Fed)의 발언이나 정책 변화가 시장에 어떤 시사점을 주고 있나요?
-현재 미국 10년물 국채금리는 얼마이고, 최근 추세와 시장 해석은 어떤가요?
+Macroeconomy
+What key U.S. economic indicators and news were released today, and how did they impact the market?
+What implications do recent statements or policy changes from the Federal Reserve (Fed) have for the market?
+What is the current yield on the U.S. 10-year Treasury, and what are the recent trends and market interpretations?
 
-주식 시장
-어제 미국 주요 지수(S&P 500, NASDAQ, Dow)는 어떤 이유로 움직였나요?
-상승률 상위 섹터와 하락률 상위 섹터는 무엇이며, 그 배경은 무엇인가요?
-오늘 주목할 만한 종목(특히 AI/반도체/메가캡 중심)은 무엇이고 이유는 무엇인가요?
+Equity Market
+What were the drivers behind the movements in the major U.S. indices (S&P 500, NASDAQ, Dow) yesterday?
+Which sectors had the highest gains and losses, and what were the underlying reasons?
+Which stocks are worth watching today—particularly in AI, semiconductors, or mega-cap segments—and why?
 
-자산군 및 ETF
-어제 주요 ETF(IVV, TLT, QQQ, GLD 등)의 수익률과 변동 원인을 알려주세요.
-금, 원유, 암호화폐의 최근 1일 가격 변화와 그 배경은 무엇인가요?
-오늘 기준으로 자산군별 리스크/기회 요인을 분석해 주세요. (주식/채권/현금/원자재 등)
+Asset Classes & ETFs
+What were the returns and key drivers of major ETFs (e.g., IVV, TLT, QQQ, GLD) yesterday?
+What were the 1-day price movements in gold, oil, and cryptocurrencies, and what factors influenced them?
+As of today, what are the key risk and opportunity factors by asset class (equities, bonds, cash, commodities)?
 
-포트폴리오 관점
-오늘 시장 상황을 고려했을 때 포트폴리오에 어떤 리밸런싱 전략이 필요할까요?
-단기적으로 매수 기회가 보이는 ETF나 종목이 있다면 추천해 주세요.
-현재 시장에서 회피해야 할 자산군이나 리스크 요인은 무엇인가요?
+Portfolio Perspective
+
+Based on today’s market conditions, what portfolio rebalancing strategies should be considered?
+Are there any ETFs or individual stocks that present short-term buying opportunities?
+What asset classes or risk factors should be avoided in the current environment?

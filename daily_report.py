@@ -87,7 +87,7 @@ for u_question in questions:
         content1 = f1.read()
         content2 = f2.read()
 
-    user_question = "today is: " + today + "\n" + content1 + "\n" + content2  # 줄바꿈 포함하여 연결
+    user_question = content1 + "\n" + content2  # 줄바꿈 포함하여 연결
 
     # 🤖 GPT-4o 호출
     response = client.chat.completions.create(

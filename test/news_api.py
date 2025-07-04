@@ -29,17 +29,16 @@ url = "https://newsapi.org/v2/top-headlines"
 params = {
     "country": "us",
     "category": "business", 
-    "pageSize": 10,
+    "pageSize": 5,
     "apiKey": NEWS_API_KEY
 }
 response = requests.get(url, params=params)
 data = response.json()
-
 
 def translate_en_to_ko(text):
     return GoogleTranslator(source='en', target='ko').translate(text)
 
 print("📢 [오늘의 비즈니스 뉴스]\n")
 for idx, article in enumerate(data["articles"], 1):
-    print(translate_en_to_ko(article['title']))
-    print(f"   🔗 {article['url']}\n")
+    print(article['title'])
+    print(f" {article['url']}\n")

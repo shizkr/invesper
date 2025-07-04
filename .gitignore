@@ -2,3 +2,6 @@
 .env
 *.pdf
 *.png
+*.mp3
+*.jpg
+security/*.json

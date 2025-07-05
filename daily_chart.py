@@ -30,6 +30,8 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 pdf = FPDF()
 pdf.add_page()
 
+act_width = pdf.w - pdf.l_margin - pdf.r_margin
+
 pdf.add_font("NotoSansKR-Regular", "", "fonts/static/NotoSansKR-Regular.ttf")
 pdf.add_font("NotoSansKR-Bold", "", "fonts/static/NotoSansKR-Bold.ttf")
 pdf.set_font("NotoSansKR-Regular", size=11)
@@ -82,13 +84,13 @@ plt.text(last_date, last_price, f'{last_price:.2f}', color='red', fontsize=12,
 image_name = 'chart_sp500.png'
 plt.savefig(image_name, format='png')
 
-pdf.image(image_name, x=10, y=pdf.get_y(), w=200)
+pdf.image(image_name, x=10, y=pdf.get_y(), w=act_width)
 start_y = pdf.get_y()
 
 # Find height
 with Image.open(image_name) as img:
     width_px, height_px = img.size
-scaled_height = 200 * (height_px / width_px)
+scaled_height = act_width * (height_px / width_px)
 os.remove(image_name)
 
 # Find next pdf starting point
@@ -127,12 +129,12 @@ plt.tight_layout()
 image_name = "chart_" + f'{start_y}' + '.png'
 plt.savefig(image_name, format='png')
 
-pdf.image(image_name, x=10, y=start_y, w=200)
+pdf.image(image_name, x=10, y=start_y, w=act_width)
 
 # Find height
 with Image.open(image_name) as img:
     width_px, height_px = img.size
-scaled_height = 200 * (height_px / width_px)
+scaled_height = act_width * (height_px / width_px)
 os.remove(image_name)
 
 # Find next pdf starting point
@@ -177,15 +179,19 @@ plt.savefig(image_name, format='png')
 # Find height
 with Image.open(image_name) as img:
     width_px, height_px = img.size
-scaled_height = 200 * (height_px / width_px)
+scaled_height = act_width * (height_px / width_px)
 
 # Find next pdf starting point
-start_y += 5 + scaled_height
-if start_y > pdf.h + 5 - pdf.b_margin:
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
     pdf.add_page() 
+    print("new page")
     pdf.set_y(pdf.t_margin)
     start_y = pdf.t_margin
-pdf.image(image_name, x=10, y=start_y, w=200)
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+print(start_y) # next start point
+
 os.remove(image_name)
 
 ###################################################
@@ -227,15 +233,88 @@ plt.savefig(image_name, format='png')
 # Find height
 with Image.open(image_name) as img:
     width_px, height_px = img.size
-scaled_height = 200 * (height_px / width_px)
+scaled_height = act_width * (height_px / width_px)
 
 # Find next pdf starting point
-start_y += 5 + scaled_height
-if start_y > pdf.h + 5 - pdf.b_margin:
-    pdf.add_page() 
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    print("new page")
     pdf.set_y(pdf.t_margin)
     start_y = pdf.t_margin
-pdf.image(image_name, x=10, y=start_y, w=200)
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+print(start_y) # next start point
+os.remove(image_name)
+
+###################################################
+# 
+###################################################
+import pandas as pd
+from bs4 import BeautifulSoup
+
+# Multpl.com에서 제공하는 CSV 다운로드 링크
+url = 'https://www.multpl.com/s-p-500-pe-ratio/table/by-month'
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'html.parser')
+
+table = soup.find('table')
+rows = table.find_all('tr')
+
+last_date = ''
+last_value = float(0)
+data = []
+month = 0
+for row in rows[1:]:
+    cols = row.find_all('td')
+    if len(cols) == 2 and month < 120: # 10 years
+        date = cols[0].text.strip()
+        date = date[:-1] if isinstance(date, str) and not date[-1].isdigit() else date
+        month += 1
+        value = cols[1].text.strip()
+        value = value[1:] if isinstance(value, str) and not value[0].isdigit() else value
+        value = value[1:] if isinstance(value, str) and not value[0].isdigit() else value
+        #print(f"{date} ")
+        #print(f"{value}")
+        if month == 1:
+            last_date = date
+            last_value = value
+        data.insert(0, (date, value))
+
+df = pd.DataFrame(data, columns=['Date', 'P/E Ratio'])
+df = df[df['Date'].astype(str).str[-1].str.isdigit()]
+df['Date'] = pd.to_datetime(df['Date'])
+df['P/E Ratio'] = pd.to_numeric(df['P/E Ratio'], errors = 'coerce')
+
+# 차트 그리기
+plt.figure(figsize=(12,6))
+plt.plot(df['Date'], df['P/E Ratio'])
+plt.title('S&P 500 P/E Ratio (by Month)')
+#plt.text(20, 30, "Hello", fontsize=12, color='red')
+plt.xlabel('Date')
+plt.ylabel('P/E Ratio')
+plt.grid(True)
+plt.xticks(df['Date'][::3], rotation=90)
+plt.tight_layout()
+
+image_name = "chart_" + f'{start_y}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+print(start_y) # next start point
 os.remove(image_name)
 
 ###################################################

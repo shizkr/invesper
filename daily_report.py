@@ -276,18 +276,3 @@ filename = f"ai_invest_report_{today}.pdf"
 print(filename)
 pdf.output(filename)
 
-recipients = ["invesperman@gmail.com"]
-bcc_recipients = ["denny.ds.yang@gmail.com", "denny.ds.yang2@gmail.com"]
-
-# 📧 이메일 전송
-yag = yagmail.SMTP(user=EMAIL_USER, password=EMAIL_PASS)
-yag.send(
-    to=recipients,
-    bcc=bcc_recipients,
-    subject=f"Daily AI 투자 리포트 ({today})",
-    contents="오늘의 AI 기반 투자 리포트를 첨부했습니다.\n\n감사합니다.",
-    attachments=filename
-)
-
-print("이메일 전송 완료")
-

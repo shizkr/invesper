@@ -23,8 +23,8 @@ yag = yagmail.SMTP(user=EMAIL_USER, password=EMAIL_PASS)
 yag.send(
     to=recipients,
     bcc=bcc_recipients,
-    subject=f"경제 지표 리포트 ({today})",
-    contents="오늘의 경제 지표 리포트를 첨부했습니다.\n\n감사합니다.",
+    subject=f"AI 투자와 경제 지표 리포트 ({today})",
+    contents="오늘의 AI 투자 전망 및 경제 지표 리포트를 첨부했습니다.\n\n감사합니다.",
     attachments=[file1, file2]
 )
 

@@ -245,18 +245,3 @@ filename = f"economy_chart_report_{today}.pdf"
 print(filename)
 pdf.output(filename)
 
-recipients = ["invesperman@gmail.com"]
-bcc_recipients = ["denny.ds.yang@gmail.com", "denny.ds.yang2@gmail.com"]
-
-# 📧 이메일 전송
-yag = yagmail.SMTP(user=EMAIL_USER, password=EMAIL_PASS)
-yag.send(
-    to=recipients,
-    bcc=bcc_recipients,
-    subject=f"경제 지표 리포트 ({today})",
-    contents="오늘의 경제 지표 리포트를 첨부했습니다.\n\n감사합니다.",
-    attachments=filename
-)
-
-print("이메일 전송 완료")
-

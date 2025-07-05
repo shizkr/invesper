@@ -189,6 +189,57 @@ pdf.image(image_name, x=10, y=start_y, w=200)
 os.remove(image_name)
 
 ###################################################
+# 10Y US BOND chart 
+###################################################
+# 오늘 날짜 자동 설정
+today = datetime.today().strftime('%Y-%m-%d')
+
+# US10Y 데이터 다운로드
+us10y = yf.download('^TNX', start='2015-01-01', end=today)
+
+# 수익률은 /100 해서 퍼센트로
+yields = us10y['Close']
+
+# 그래프 그리기
+plt.figure(figsize=(12, 6))
+plt.plot(us10y.index, yields, label='US10Y Yield (%)')
+plt.title('US 10-Year Treasury Yield (10Y)')
+plt.xlabel('Date')
+plt.ylabel('Yield (%)')
+plt.grid(True)
+plt.legend()
+
+# 마지막 값 표시
+last_date = us10y.index[-1].strftime('%Y-%m-%d')
+last_yield = float(yields.iloc[-1])
+plt.annotate(f'{last_yield:.2f}%\n({last_date})',
+             xy=(us10y.index[-1], last_yield),
+             xytext=(-80, 30),
+             textcoords='offset points',
+             arrowprops=dict(arrowstyle='->'),
+             fontsize=10,
+             bbox=dict(boxstyle="round,pad=0.3", fc="lightyellow", ec="gray"))
+plt.tight_layout()
+
+image_name = "chart_" + f'{start_y}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size
+scaled_height = 200 * (height_px / width_px)
+
+# Find next pdf starting point
+start_y += 5 + scaled_height
+if start_y > pdf.h + 5 - pdf.b_margin:
+    pdf.add_page() 
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=200)
+os.remove(image_name)
+
+
+###################################################
 # Save to pdf file
 ###################################################
 filename = f"economy_chart_report_{today}.pdf"

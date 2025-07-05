@@ -23,7 +23,9 @@ jobs:
           pip install openai fpdf2 yagmail python-dotenv yfinance deep_translator
 
       - name: 📤 GPT → PDF → 이메일 발송 실행
-        run: python daily_report.py
+        run: |
+          python daily_report.py
+          python daily_chart.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GNEWS_API_KEY: ${{ secrets.GNEWS_API_KEY }}

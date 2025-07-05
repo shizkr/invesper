@@ -26,6 +26,7 @@ jobs:
         run: |
           python daily_report.py
           python daily_chart.py
+          python send_email.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GNEWS_API_KEY: ${{ secrets.GNEWS_API_KEY }}

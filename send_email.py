@@ -15,7 +15,7 @@ bcc_recipients = ["denny.ds.yang@gmail.com", "denny.ds.yang2@gmail.com"]
 
 today = datetime.today().strftime("%Y-%m-%d")
 
-file1=f"economy_chart_report_{today}.pdf"
+file1=f"ai_invest_report_{today}.pdf"
 file2=f"economy_chart_report_{today}.pdf"
 
 # 📧 이메일 전송

@@ -1,4 +1,4 @@
-#######
+import random
 import os
 import openai
 from openai import OpenAI
@@ -81,7 +81,8 @@ plt.grid(True)
 
 plt.text(last_date, last_price, f'{last_price:.2f}', color='red', fontsize=12,
          verticalalignment='bottom', horizontalalignment='right')
-image_name = 'chart_sp500.png'
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
 plt.savefig(image_name, format='png')
 
 pdf.image(image_name, x=10, y=pdf.get_y(), w=act_width)
@@ -126,19 +127,26 @@ plt.grid(True)
 plt.legend()
 plt.tight_layout()
 
-image_name = "chart_" + f'{start_y}' + '.png'
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
 plt.savefig(image_name, format='png')
-
-pdf.image(image_name, x=10, y=start_y, w=act_width)
 
 # Find height
 with Image.open(image_name) as img:
     width_px, height_px = img.size
 scaled_height = act_width * (height_px / width_px)
-os.remove(image_name)
 
 # Find next pdf starting point
+start_next = int(start_y) + int(scaled_height)  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
 start_y += 5 + scaled_height
+#print(start_y) # next start point
+os.remove(image_name)
 
 ###################################################
 # CPI rate chart 
@@ -173,7 +181,8 @@ plt.grid(True)
 plt.legend()
 plt.tight_layout()
 
-image_name = "chart_" + f'{start_y}' + '.png'
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
 plt.savefig(image_name, format='png')
 
 # Find height
@@ -182,10 +191,10 @@ with Image.open(image_name) as img:
 scaled_height = act_width * (height_px / width_px)
 
 # Find next pdf starting point
-start_next = start_y + scaled_height  # end of current image
+start_next = int(start_y) + int(scaled_height)  # end of current image
 if start_next > pdf.h - pdf.b_margin:
     pdf.add_page() 
-    print("new page")
+    #print("new page")
     pdf.set_y(pdf.t_margin)
     start_y = pdf.t_margin
 pdf.image(image_name, x=10, y=start_y, w=act_width)
@@ -197,13 +206,13 @@ os.remove(image_name)
 ###################################################
 # 10Y US BOND chart 
 ###################################################
-# 오늘 날짜 자동 설정
 today = datetime.today().strftime('%Y-%m-%d')
+start = '2015-01-01'
 
 # US10Y 데이터 다운로드
-us10y = yf.download('^TNX', start='2015-01-01', end=today)
+us10y = yf.download('^TNX', start=start, end=today, auto_adjust=False)
 
-# 수익률은 /100 해서 퍼센트로
+# 수익률은 /10 (퍼센트)
 yields = us10y['Close']
 
 # 그래프 그리기
@@ -217,7 +226,7 @@ plt.legend()
 
 # 마지막 값 표시
 last_date = us10y.index[-1].strftime('%Y-%m-%d')
-last_yield = float(yields.iloc[-1])
+last_yield = yields.iloc[-1].item()
 plt.annotate(f'{last_yield:.2f}%\n({last_date})',
              xy=(us10y.index[-1], last_yield),
              xytext=(-80, 30),
@@ -227,28 +236,34 @@ plt.annotate(f'{last_yield:.2f}%\n({last_date})',
              bbox=dict(boxstyle="round,pad=0.3", fc="lightyellow", ec="gray"))
 plt.tight_layout()
 
-image_name = "chart_" + f'{start_y}' + '.png'
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
 plt.savefig(image_name, format='png')
 
 # Find height
 with Image.open(image_name) as img:
     width_px, height_px = img.size
 scaled_height = act_width * (height_px / width_px)
+print("scaled heigh")
+print(start_y)
+print(scaled_height)
 
 # Find next pdf starting point
-start_next = start_y + scaled_height  # end of current image
+start_next = int(start_y) + int(scaled_height)  # end of current image
+print("start_next US 1-Y")
+print(start_next) # next start point
 if start_next > pdf.h - pdf.b_margin:
     pdf.add_page()
-    print("new page")
+    #print("new page")
     pdf.set_y(pdf.t_margin)
     start_y = pdf.t_margin
 pdf.image(image_name, x=10, y=start_y, w=act_width)
 start_y += 5 + scaled_height
-print(start_y) # next start point
+#print(start_y) # next start point
 os.remove(image_name)
 
 ###################################################
-# 
+# SP 500 PE chart 
 ###################################################
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -274,8 +289,6 @@ for row in rows[1:]:
         value = cols[1].text.strip()
         value = value[1:] if isinstance(value, str) and not value[0].isdigit() else value
         value = value[1:] if isinstance(value, str) and not value[0].isdigit() else value
-        #print(f"{date} ")
-        #print(f"{value}")
         if month == 1:
             last_date = date
             last_value = value
@@ -290,11 +303,20 @@ df['P/E Ratio'] = pd.to_numeric(df['P/E Ratio'], errors = 'coerce')
 plt.figure(figsize=(12,6))
 plt.plot(df['Date'], df['P/E Ratio'])
 plt.title('S&P 500 P/E Ratio (by Month)')
-#plt.text(20, 30, "Hello", fontsize=12, color='red')
 plt.xlabel('Date')
 plt.ylabel('P/E Ratio')
 plt.grid(True)
-plt.xticks(df['Date'][::3], rotation=90)
+plt.xticks(df['Date'][::3], rotation=45)
+
+# 마지막 값(최신 P/E Ratio) 빨간색으로 표시 및 표기
+plt.scatter(df['Date'].iloc[-1], df['P/E Ratio'].iloc[-1], color='red', zorder=5)
+plt.text(
+    df['Date'].iloc[-1],
+    df['P/E Ratio'].iloc[-1],
+    f"{df['P/E Ratio'].iloc[-1]:.2f}\n{df['Date'].iloc[-1].strftime('%Y-%m-%d')}",
+    fontsize=10, color='red', va='bottom', ha='right',
+    bbox=dict(facecolor='white', edgecolor='red', boxstyle='round,pad=0.3')
+)
 plt.tight_layout()
 
 image_name = "chart_" + f'{start_y}' + '.png'
@@ -314,7 +336,179 @@ if start_next > pdf.h - pdf.b_margin:
     start_y = pdf.t_margin
 pdf.image(image_name, x=10, y=start_y, w=act_width)
 start_y += 5 + scaled_height
-print(start_y) # next start point
+#print(start_y) # next start point
+os.remove(image_name)
+
+###################################################
+# VIX index chart last 2 year 
+###################################################
+print("VIX index")
+# VIX 지수 데이터 다운로드
+vix = yf.Ticker("^VIX")
+hist = vix.history(period="2y")  # 최근 2년 데이터
+
+# 마지막 값 추출
+last_date = hist.index[-1]
+last_close = hist['Close'].iloc[-1]
+
+plt.figure(figsize=(12, 6))
+plt.plot(hist.index, hist['Close'], label='VIX Index (S&P 500 Volatility)')
+plt.title('VIX (S&P 500 Volatility Index) - Last 2 Year')
+plt.xlabel('Date')
+plt.ylabel('VIX Index')
+plt.legend()
+plt.grid(True)
+
+# 마지막 값에 마커 추가
+plt.scatter(last_date, last_close, color='red', zorder=5)
+
+# 텍스트 위치를 그래프 오른쪽 위 바깥에 표시
+ax = plt.gca()
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
+
+# x축 끝에서 약간 안쪽, y축 상단에서 약간 아래 위치에 텍스트 표시
+text_x = hist.index[-1] + (hist.index[-1] - hist.index[0]) * 0.01
+text_y = ylim[1] - (ylim[1] - ylim[0]) * 0.08
+
+plt.text(text_x, text_y, f"{last_close:.2f}\n{last_date.date()}",
+         fontsize=11, color='red', va='top', ha='left',
+         bbox=dict(facecolor='white', edgecolor='red', boxstyle='round,pad=0.3'))
+
+plt.tight_layout()
+
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+#print(start_y) # next start point
+os.remove(image_name)
+
+###################################################
+# FED Interest rate chart 
+###################################################
+# FRED (Federal Reserve Economic Data)에서 연방기금금리(Upper Target Rate) 데이터 다운로드
+url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARU"
+df = pd.read_csv(url)
+print(df.columns)  # 실제 컬럼명 확인
+
+# 컬럼명 정정 예시
+if 'OBSERVATION_DATE' not in df.columns:
+    df.columns = [col.strip().upper() for col in df.columns]
+print(df.columns)  # 다시 확인
+
+# 날짜 변환 및 최근 50년 필터링
+df['DATE'] = pd.to_datetime(df['OBSERVATION_DATE'])
+df = df.dropna(subset=["DFEDTARU"])
+start_date = df['DATE'].max() - pd.DateOffset(years=50)
+df_50y = df[df['DATE'] >= start_date]
+
+plt.figure(figsize=(12,6))
+plt.plot(df_50y['DATE'], df_50y['DFEDTARU'], label='Federal Funds Target Rate (Upper Bound)')
+plt.title('US Federal Funds Target Rate (Upper Bound)')
+plt.xlabel('Date')
+plt.ylabel('Interest Rate (%)')
+plt.grid(True)
+plt.legend()
+
+# 최신 값 표시
+last_date = df_50y['DATE'].iloc[-1]
+last_rate = df_50y['DFEDTARU'].iloc[-1]
+plt.scatter(last_date, last_rate, color='red', zorder=5)
+plt.text(
+    last_date, last_rate,
+    f"{last_rate:.2f}%\n{last_date.strftime('%Y-%m-%d')}",
+    fontsize=10, color='red', va='bottom', ha='right',
+    bbox=dict(facecolor='white', edgecolor='red', boxstyle='round,pad=0.3')
+)
+plt.tight_layout()
+
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+#print(start_y) # next start point
+os.remove(image_name)
+
+###################################################
+# Gold price chart 
+###################################################
+# Fetch historical data for gold price
+symbol = "GC=F"  # Gold Futures symbol on Yahoo Finance
+gold_data = yf.download(symbol, start="1975-01-01", end=datetime.now().strftime("%Y-%m-%d"))
+
+# Reset index for easier handling
+gold_data.reset_index(inplace=True)
+
+# Plotting the gold price
+plt.figure(figsize=(12, 6))
+plt.plot(gold_data['Date'], gold_data['Close'], label='Gold Price')
+plt.title('Gold Price')
+plt.xlabel('Date')
+plt.ylabel('Price (USD per ounce)')
+plt.grid(True)
+plt.legend()
+
+# Highlighting the latest value
+last_date = pd.Timestamp(gold_data['Date'].iloc[-1])  # Ensure proper date formatting
+last_price = float(gold_data['Close'].iloc[-1])  # Ensure scalar float value for formatting
+plt.scatter(last_date, last_price, color='red', zorder=5)
+plt.text(
+    last_date, last_price,
+    f"${last_price:.2f}\n{last_date.strftime('%Y-%m-%d')}",
+    fontsize=10, color='red', va='bottom', ha='right',
+    bbox=dict(facecolor='white', edgecolor='red', boxstyle='round,pad=0.3')
+)
+
+plt.tight_layout()
+
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+#print(start_y) # next start point
 os.remove(image_name)
 
 ###################################################

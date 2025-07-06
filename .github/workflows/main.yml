@@ -20,10 +20,11 @@ jobs:
 
       - name: 📦 의존성 설치
         run: |
-          pip install openai fpdf2 yagmail python-dotenv yfinance deep_translator matplotlib PyPDF2 pandas_datareader pd bs4
+          pip install openai fpdf2 yagmail python-dotenv yfinance deep_translator matplotlib PyPDF2 pandas_datareader pd bs4 seaborn
 
       - name: 📤 GPT → PDF → 이메일 발송 실행
         run: |
+          python cnn_fear_greed_chart.py
           python daily_report.py
           python daily_chart.py
           python send_email.py

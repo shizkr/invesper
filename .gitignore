@@ -4,4 +4,6 @@
 *.png
 *.mp3
 *.jpg
+*.html
+*.swo
 security/*.json

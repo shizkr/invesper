@@ -14,6 +14,8 @@ from PIL import Image
 from io import BytesIO
 from deep_translator import GoogleTranslator
 
+import telegram
+
 if os.getenv("GITHUB_ACTIONS") != "true":
     load_dotenv()  # 로컬 환경일 경우에만 .env 파일을 불러옵니다
 
@@ -22,6 +24,12 @@ OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 GNEWS_API_KEY = os.environ["GNEWS_API_KEY"]
 EMAIL_USER = os.environ["EMAIL_USER"]
 EMAIL_PASS = os.environ["EMAIL_PASS"]
+BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
+CHAT_ID = os.environ["TELEGRAM_CHAT_ID"] 
+
+#telegram.send_message_to_telegram(BOT_TOKEN, CHAT_ID, answer)
+def tg_msg(msg):
+    telegram.send_message_to_telegram(BOT_TOKEN, CHAT_ID, msg)
 
 # OpenAI 클라이언트 생성
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -97,6 +105,7 @@ pdf.set_text_color(0, 0, 255)
 pdf.multi_cell(0, 10, f"주요 뉴스 및 영향\n", align="C")
 pdf.set_font("NotoSansKR-Regular", size=11)
 pdf.set_text_color(0, 0, 0)
+tgm = " **주요 뉴스 및 영향** \n"
 
 url = 'https://gnews.io/api/v4/top-headlines'
 params = {
@@ -143,6 +152,9 @@ pdf.set_font("NotoSansKR-Regular", size=11)
 pdf.set_text_color(0, 0, 0)
 pdf.multi_cell(0, 10, f"\n{answer} \n")
 
+tgm += answer
+tg_msg(tgm)
+
 ###################################################
 # questions
 ###################################################
@@ -171,16 +183,23 @@ for u_question in questions:
     pdf.set_text_color(0, 0, 255)
     if u_question.startswith("macroeconomy"):
         pdf.multi_cell(0, 10, f"거시경제 분석\n", align="C")
+        tgm="**거시경제 분석**\n"
     elif u_question.startswith("equity"):
         pdf.multi_cell(0, 10, f"주식 시장 분석\n", align="C")
+        tgm="**주식 시장 분석**\n"
     elif u_question.startswith("asset"):
         pdf.multi_cell(0, 10, f"자산 시장 및 ETF 분석\n", align="C")
+        tgm="**자산 시장 및 ETF 분석**\n"
     elif u_question.startswith("portfolio"):
         pdf.multi_cell(0, 10, f"포트폴리오 전략 분석\n", align="C")
+        tgm="**포트폴리오 전략 분석**\n"
 
     pdf.set_font("NotoSansKR-Regular", size=11)
     pdf.set_text_color(0, 0, 0)
     pdf.multi_cell(0, 10, f"{answer} \n", align="L")
+
+    tgm += answer
+    tg_msg(tgm)
 
 ###################################################
 # 보고서에 넣을 종목 리스트
@@ -198,6 +217,7 @@ pdf.set_font("NotoSansKR-Regular", size=12)
 pdf.multi_cell(0, 10, f"포트폴리오 분석 및 전망 \n", align="C")
 pdf.set_font("NotoSansKR-Regular", size=11)
 pdf.set_text_color(0, 0, 0)
+tgm = "**포트폴리오 분석 및 전망**\n"
 
 # 마지막 정리
 # 🤖 GPT-4o 호출
@@ -211,6 +231,9 @@ response = client.chat.completions.create(
 )   
 answer = response.choices[0].message.content
 pdf.multi_cell(0, 10, f"{answer} \n")
+
+tgm += answer
+tg_msg(tgm)
 
 def get_etf_current_price(symbol):
     ticker = yf.Ticker(symbol)

@@ -601,8 +601,212 @@ if start_next > pdf.h - pdf.b_margin:
 pdf.image(image_name, x=10, y=start_y, w=act_width)
 start_y += 5 + scaled_height
 #print(start_y) # next start point
+#os.remove(image_name)
+
+###################################################
+# Dollar Index 
+###################################################
+# DXY 심볼 (Yahoo Finance 기준)
+today = datetime.today().strftime('%Y-%m-%d')
+dxy = yf.download('DX-Y.NYB', start='2015-07-07', end=today)
+
+plt.figure(figsize=(14, 7))
+plt.plot(dxy['Close'], label='DXY (US Dollar Index)')
+plt.title('DXY (US Dollar Index) 10Y Chart')
+plt.xlabel('Date')
+plt.ylabel('Index')
+plt.legend()
+plt.grid()
+
+# 마지막 값과 날짜 표시
+last_date = dxy.index[-1].strftime('%Y-%m-%d')
+last_value = float(dxy['Close'].iloc[-1])
+plt.annotate(f"{last_value:.2f} ({last_date})",
+             xy=(dxy.index[-1], last_value),
+             xytext=(-80, 30),
+             textcoords='offset points',
+             arrowprops=dict(arrowstyle='->', color='red'),
+             fontsize=12,
+             color='red',
+             bbox=dict(boxstyle="round,pad=0.3", edgecolor='red', facecolor='white', alpha=0.8))
+
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+#print(start_y) # next start point
+os.remove(image_name)
+###################################################
+# US M2 chart 
+###################################################
+# Get last 10 years
+end = datetime.today()
+start = end - timedelta(days=365*10)
+
+# Download US M2 Money Stock from FRED ("M2SL")
+df = web.DataReader('M2SL', 'fred', start, end)
+
+plt.figure(figsize=(14, 7))
+plt.plot(df.index, df['M2SL'], label='US M2 Money Stock')
+plt.title('US M2 Money Stock (Last 10 Years)')
+plt.xlabel('Date')
+plt.ylabel('Billions of Dollars')
+plt.legend()
+plt.grid()
+
+# Annotate last value and date
+last_date = df.index[-1].strftime('%Y-%m-%d')
+last_value = df['M2SL'][-1]
+plt.annotate(f"{last_value:.2f} ({last_date})",
+             xy=(df.index[-1], last_value),
+             xytext=(-100, 40),
+             textcoords='offset points',
+             arrowprops=dict(arrowstyle='->', color='red'),
+             fontsize=12,
+             color='red',
+             bbox=dict(boxstyle="round,pad=0.3", edgecolor='red', facecolor='white', alpha=0.8))
+
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+#print(start_y) # next start point
+os.remove(image_name)
+###################################################
+# GDP Growth Rate 
+###################################################
+# 10년 기간 설정
+end = datetime.today()
+start = end - timedelta(days=365*10)
+
+# 미국 실질 GDP 성장률 데이터 다운로드 (분기별, 전년 동기 대비, %)
+# FRED 코드: 'A191RL1Q225SBEA'
+df = web.DataReader('A191RL1Q225SBEA', 'fred', start, end)
+
+plt.figure(figsize=(14, 7))
+plt.plot(df.index, df['A191RL1Q225SBEA'], marker='o', label='US Real GDP Growth Rate (YoY, %)')
+plt.title('US GDP Growth (Last 10Y, YoY)')
+plt.xlabel('Date')
+plt.ylabel('Growth (%)')
+plt.legend()
+plt.grid()
+
+# 마지막 값과 날짜 표시
+last_date = df.index[-1].strftime('%Y-%m-%d')
+last_value = df['A191RL1Q225SBEA'][-1]
+plt.annotate(f"{last_value:.2f}% ({last_date})",
+             xy=(df.index[-1], last_value),
+             xytext=(-100, 30),
+             textcoords='offset points',
+             arrowprops=dict(arrowstyle='->', color='red'),
+             fontsize=12,
+             color='red',
+             bbox=dict(boxstyle="round,pad=0.3", edgecolor='red', facecolor='white', alpha=0.8))
+
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size 
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+#print(start_y) # next start point
 os.remove(image_name)
 
+###################################################
+# US PPI YoY Last 10 Y 
+###################################################
+# 10년 기간 설정
+end = datetime.today()
+start = end - timedelta(days=365*10)
+
+# 미국 생산자 물가지수(PPI) 데이터 다운로드 (FRED 코드: 'PPIACO')
+df = web.DataReader('PPIACO', 'fred', start, end)
+
+# YoY 변화율 (%) 계산
+df['PPI_YoY'] = df['PPIACO'].pct_change(periods=12) * 100
+
+plt.figure(figsize=(14, 7))
+plt.plot(df.index, df['PPI_YoY'], label='US PPI YoY Change (%)')
+plt.title('US PPI YoY Rate (Last 10Y)')
+plt.xlabel('Date')
+plt.ylabel('Rate (%)')
+plt.legend()
+plt.grid()
+
+# 마지막 값과 날짜 표시 (NaN이 아닌 마지막 값)
+last_valid_index = df['PPI_YoY'].last_valid_index()
+last_value = df.loc[last_valid_index, 'PPI_YoY']
+last_date = last_valid_index.strftime('%Y-%m-%d')
+
+plt.annotate(f"{last_value:.2f}% ({last_date})",
+             xy=(last_valid_index, last_value),
+             xytext=(-100, 30),
+             textcoords='offset points',
+             arrowprops=dict(arrowstyle='->', color='red'),
+             fontsize=12,
+             color='red',
+             bbox=dict(boxstyle="round,pad=0.3", edgecolor='red', facecolor='white', alpha=0.8))
+
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size 
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+#print(start_y) # next start point
+os.remove(image_name)
 ###################################################
 # Save to pdf file
 ###################################################

@@ -808,6 +808,149 @@ start_y += 5 + scaled_height
 #print(start_y) # next start point
 os.remove(image_name)
 ###################################################
+#  Bit Coin Price Chart
+###################################################
+# 1. Fetch Bitcoin daily price data for last ~1 years (max allowed by CoinGecko is 365 days)
+url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
+params = {
+    "vs_currency": "usd",
+    "days": "365",  # 1 years
+    "interval": "daily"
+}
+resp = requests.get(url, params=params)
+data = resp.json()
+
+# 2. Parse data to DataFrame
+prices = data["prices"]  # Each item: [timestamp(ms), price]
+df = pd.DataFrame(prices, columns=['timestamp', 'price'])
+df['date'] = pd.to_datetime(df['timestamp'], unit='ms')
+df.set_index('date', inplace=True)
+
+# 3. Plot chart
+plt.figure(figsize=(16,8))
+plt.plot(df.index, df['price'], label='BTC Price (USD)')
+plt.title('Bitcoin Price - Last 1 Years')
+plt.xlabel('Date')
+plt.ylabel('Price (USD)')
+plt.grid(True)
+
+# 4. Annotate last price and date
+last_date = df.index[-1]
+last_price = df['price'].iloc[-1]
+plt.scatter(last_date, last_price, color='red', zorder=5)
+plt.annotate(
+    f'{last_date.strftime("%Y-%m-%d")}\n${last_price:,.2f}',
+    xy=(last_date, last_price),
+    xytext=(-80,30),
+    textcoords='offset points',
+    arrowprops=dict(arrowstyle="->", color='red'),
+    fontsize=12,
+    backgroundcolor='white',
+    color='red'
+)
+
+plt.legend()
+plt.tight_layout()
+
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+#print(start_y) # next start point
+os.remove(image_name)
+###################################################
+# US Debt to GDP 
+###################################################
+FRED_API_KEY = '230c47a4094b5f209026cf42c33e2be5'
+
+def fetch_fred_series(series_id, api_key):
+    url = f"https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        "series_id": series_id,
+        "api_key": api_key,
+        "file_type": "json",
+        "observation_start": "2015-01-01"
+    }
+    resp = requests.get(url, params=params)
+    obs = resp.json()['observations']
+    df = pd.DataFrame(obs)
+    df['date'] = pd.to_datetime(df['date'])
+    df['value'] = pd.to_numeric(df['value'], errors='coerce')
+    return df.set_index('date')[['value']]
+
+# 1. Fetch data
+debt = fetch_fred_series('GFDEBTN', FRED_API_KEY)
+gdp = fetch_fred_series('GDP', FRED_API_KEY)
+
+# 2. Resample to quarterly (GDP is quarterly, Debt is monthly)
+debt_q = debt.resample('Q').last()
+gdp_q = gdp.resample('Q').last()
+
+# 3. Align indexes, calculate Debt/GDP ratio
+df = pd.concat([debt_q, gdp_q], axis=1, keys=['Debt', 'GDP']).dropna()
+df['Debt_to_GDP'] = df['Debt'] / df['GDP'] * 100
+
+# 4. Plot
+plt.figure(figsize=(14,7))
+plt.plot(df.index, df['Debt_to_GDP'], label='US Federal Debt / GDP (%)')
+plt.title('US Debt-to-GDP Ratio (Last 10 Years)')
+plt.xlabel('Date')
+plt.ylabel('Debt-to-GDP (%)')
+plt.grid(True)
+
+# 5. Annotate last point
+last_date = df.index[-1]
+last_pct = df['Debt_to_GDP'].iloc[-1]
+plt.scatter(last_date, last_pct, color='red', zorder=5)
+plt.annotate(
+    f'{last_date.strftime("%Y-%m-%d")}\n{last_pct:.2f}%',
+    xy=(last_date, last_pct),
+    xytext=(-80,30),
+    textcoords='offset points',
+    arrowprops=dict(arrowstyle="->", color='red'),
+    fontsize=12,
+    backgroundcolor='white',
+    color='red'
+)
+
+plt.legend()
+plt.tight_layout()
+
+value = random.randint(1, 1000)
+image_name = "chart_" + f'{value}' + '.png'
+plt.savefig(image_name, format='png')
+
+# Find height
+with Image.open(image_name) as img:
+    width_px, height_px = img.size
+scaled_height = act_width * (height_px / width_px)
+
+# Find next pdf starting point
+start_next = start_y + scaled_height  # end of current image
+if start_next > pdf.h - pdf.b_margin:
+    pdf.add_page()
+    #print("new page")
+    pdf.set_y(pdf.t_margin)
+    start_y = pdf.t_margin
+pdf.image(image_name, x=10, y=start_y, w=act_width)
+start_y += 5 + scaled_height
+#print(start_y) # next start point
+os.remove(image_name)
+###################################################
 # Save to pdf file
 ###################################################
 filename = f"economy_chart_report_{today}.pdf"

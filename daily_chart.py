@@ -22,6 +22,7 @@ OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 GNEWS_API_KEY = os.environ["GNEWS_API_KEY"]
 EMAIL_USER = os.environ["EMAIL_USER"]
 EMAIL_PASS = os.environ["EMAIL_PASS"]
+FRED_API_KEY = os.environ["FRED_API_KEY"]
 
 # OpenAI 클라이언트 생성
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -875,8 +876,6 @@ os.remove(image_name)
 ###################################################
 # US Debt to GDP 
 ###################################################
-FRED_API_KEY = '230c47a4094b5f209026cf42c33e2be5'
-
 def fetch_fred_series(series_id, api_key):
     url = f"https://api.stlouisfed.org/fred/series/observations"
     params = {

@@ -902,7 +902,7 @@ gdp_q = gdp.resample('Q').last()
 
 # 3. Align indexes, calculate Debt/GDP ratio
 df = pd.concat([debt_q, gdp_q], axis=1, keys=['Debt', 'GDP']).dropna()
-df['Debt_to_GDP'] = df['Debt'] / df['GDP'] * 100
+df['Debt_to_GDP'] = df['Debt'] / df['GDP'] / 10
 
 # 4. Plot
 plt.figure(figsize=(14,7))

@@ -80,8 +80,8 @@ plt.ylabel('Closing Price')
 plt.legend()
 plt.grid(True)
 
-plt.text(last_date, last_price, f'{last_price:.2f}', color='red', fontsize=12,
-         verticalalignment='bottom', horizontalalignment='right')
+plt.text(last_date, last_price, f'{last_price:.2f}\n{last_date.strftime("%Y-%m-%d")}', 
+         color='red', fontsize=12, verticalalignment='bottom', horizontalalignment='right')
 value = random.randint(1, 1000)
 image_name = "chart_" + f'{value}' + '.png'
 plt.savefig(image_name, format='png')
@@ -119,7 +119,8 @@ last_value = unrate_data.iloc[-1, 0]
 plt.figure(figsize=(12, 6))
 plt.plot(unrate_data.index, unrate_data['UNRATE'], label='Unemployment Rate (%)', linewidth=2)
 plt.scatter(last_date, last_value, color='red', zorder=5)
-plt.text(last_date, last_value + 0.2, f'{last_value:.1f}%', color='red', fontsize=12)
+plt.text(last_date, last_value, f'{last_value:.2f}\n{last_date.strftime("%Y-%m-%d")}',
+         color='red', fontsize=12, verticalalignment='bottom', horizontalalignment='right')
 
 plt.title('US unemplyeement (Last 10 year)', fontsize=16)
 plt.xlabel('Date')
@@ -173,7 +174,8 @@ last_value = cpi_yoy['YoY Inflation (%)'].iloc[-1]
 plt.figure(figsize=(12, 6))
 plt.plot(cpi_yoy.index, cpi_yoy['YoY Inflation (%)'], label='CPI YoY Inflation Rate (%)', linewidth=2)
 plt.scatter(last_date, last_value, color='red', zorder=5)
-plt.text(last_date, last_value + 0.3, f'{last_value:.2f}%', color='red', fontsize=12)
+plt.text(last_date, last_value, f'{last_value:.2f}\n{last_date.strftime("%Y-%m-%d")}',
+         color='red', fontsize=12, verticalalignment='bottom', horizontalalignment='right')
 
 plt.title('U.S. Consumer Price Index – Annual Inflation Rate (YoY)', fontsize=16)
 plt.xlabel('Date')
